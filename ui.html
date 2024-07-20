@@ -1,17 +1,63 @@
-<h2>Rectangle Creator</h2>
-<p>Count: <input id="count" value="5"></p>
-<button id="create">Create</button>
-<button id="cancel">Cancel</button>
+<style>
+  .lang__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .lang__submit {
+    background-color: brown;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 8px;
+  }
+</style>
+
+<main>
+  <h2>Multlanguage Plugin</h2>
+  <form class="lang__container" id="LANG_FORM">
+    <select name="language">
+      <!-- <option value="es">ES</option>
+      <option value="en">EN</option> -->
+    </select>
+    <button class="lang__submit" type="submit">Update language</button>
+  </form>
+</main>
 <script>
+  let totalLanguages = [];
+  async function getLanguages() {
+    const serverResponse = await fetch('https://demo-ux-course.free.beeceptor.com/languages')
+    const languages = await serverResponse.json();
 
-document.getElementById('create').onclick = () => {
-  const textbox = document.getElementById('count');
-  const count = parseInt(textbox.value, 10);
-  parent.postMessage({ pluginMessage: { type: 'create-rectangles', count } }, '*')
-}
+    return languages;
+  }
 
-document.getElementById('cancel').onclick = () => {
-  parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
-}
+  getLanguages().then(languages => {
+    totalLanguages = languages
+    const select = document.querySelector('select[name="language"]')
+    languages.forEach(language => {
+      const option = document.createElement('option')
+      option.value = language.lang
+      option.textContent = language.lang.toUpperCase()
+      select.appendChild(option)
+    })
+  })
+
+  // obtener el formulario
+  const form = document.getElementById('LANG_FORM');
+  // escuchar su evento de submit
+  form.addEventListener('submit', (event) => {
+    // cancelamos el comportamiento por defecto del navegador para el evento submit y así tomamos el control
+    event.preventDefault();
+    // obtener el valor del select del usuario
+    const selecteLang = form.language.value;
+    // buscar cual es el seleccionado por el usuario
+    const selectedLanguage = totalLanguages.find(l => l.lang === selecteLang)
+    // pasar la información del idioma seleccionado por el usuario al code.ts
+    parent.postMessage({ pluginMessage: selectedLanguage }, '*')
+  })
+
 
 </script>
